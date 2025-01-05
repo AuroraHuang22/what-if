@@ -35,10 +35,10 @@
     </UCard>
 
     <UCard class="w-2/3 p-6 m-4 bg-gray-100 text-black shadow">
-      <UCardTitle>Generated Story</UCardTitle>
-      <UCardTitle v-if="loading" class="text-center text-gray-500">
+      <h1 class="text-[48px] font-bold">Generated Story</h1>
+      <h2 class="text-[24px] font-bold text-center text-gray-500" v-if="loading">
         Loading...
-      </UCardTitle>
+      </h2>
       <div v-else-if="story" class="p-4 bg-white rounded">
         <p v-text="story" />
       </div>

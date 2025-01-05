@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <NuxtLayout>
-      <NuxtPage class="grow overflow-y-auto" />
-    </NuxtLayout>
-  </div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
