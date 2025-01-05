@@ -10,7 +10,7 @@
       <template #header>
         <h1 class="text-[48px] font-bold">What if?</h1>
       </template>
-      <UForm :state="{ key: 'value' }" @submit.prevent="generateStory">
+      <UForm :state="{ key: 'value' }">
         <p v-text="`請輸入 E-616 的主體代號`" />
         <UInput v-model="name" placeholder="Enter the name" class="mb-4" />
         <p v-text="`載入此宇宙的形象記錄`" />
@@ -27,7 +27,7 @@
           placeholder="Describe the traits"
           class="mb-4"
         />
-        <UButton :disabled="loading" class="mt-4 bg-blue-500">
+        <UButton :disabled="loading" class="mt-4 bg-blue-500" @click="generateStory">
           <span v-if="loading">Generating...</span>
           <span v-else>Let’s Open the Portal</span>
         </UButton>
