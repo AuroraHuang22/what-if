@@ -1,6 +1,7 @@
 <template>
   <div>
-    <NuxtRouteAnnouncer />
-    <NuxtWelcome />
+    <NuxtLayout>
+      <NuxtPage class="grow overflow-y-auto" />
+    </NuxtLayout>
   </div>
 </template>
