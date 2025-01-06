@@ -109,7 +109,7 @@ const generateStory = async () => {
   const prompt = generatePrompt(name.value, traits.value);
   try {
     const response = await fetch(
-      "https://openaiproxy-xfnkw3l2zq-uc.a.run.app",
+      "https://generatestory-xfnkw3l2zq-uc.a.run.app",
       {
         method: "POST",
         headers: {
