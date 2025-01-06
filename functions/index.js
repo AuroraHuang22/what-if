@@ -54,24 +54,36 @@ exports.generateImages = onRequest(
       const openai = new OpenAI({apiKey: openaiApiKey.value()});
       const {image, prompts} = req.body;
 
+      if (!Array.isArray(prompts) || prompts.length === 0) {
+        return res.status(400)
+            .send({error: "Prompts must be a non-empty array."});
+      }
+
       try {
-        const imageUrls = [];
-        for (const prompt of prompts) {
-          const response = await openai.images.generate({
-            prompt,
-            image,
-            n: 1,
-            size: "1024x1024",
-            model: "dall-e-2",
-          });
+        const imagePromises = prompts.map(async (prompt) => {
+          if (image) {
+            const response = await openai.images.edits({
+              prompt,
+              image,
+              n: 1,
+              size: "1024x1024",
+              model: "dall-e-2",
+            });
+            return response.data[0].url;
+          } else {
+            const response = await openai.images.generate({
+              prompt,
+              n: 1,
+              size: "1024x1024",
+              model: "dall-e-2",
+            });
+            return response.data[0].url;
+          }
+        });
 
-          const imageUrl = response.data[0].url;
-          imageUrls.push(imageUrl);
+        const imageUrls = await Promise.all(imagePromises);
 
-          res.write(JSON.stringify({image: imageUrl}) + "\n");
-        }
-
-        res.end();
+        res.status(200).send({images: imageUrls});
       } catch (error) {
         console.error("Error generating images:", error.message);
         res.status(500).send({error: "Failed to generate images."});

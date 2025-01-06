@@ -241,9 +241,14 @@ const generateStory = async () => {
 const generateImages = async (imageFile, prompts) => {
   loadingImages.value = true;
   errorImages.value = "";
+  images.value = []; // 清空之前的图片列表
+  console.log("generateImages");
 
   try {
-    const base64Image = await fileToBase64(imageFile);
+    const base64Image = imageFile
+      ? await fileToBase64(imageFile)
+      : null;
+
     const response = await fetch(
       "https://generateimages-xfnkw3l2zq-uc.a.run.app",
       {
@@ -253,25 +258,22 @@ const generateImages = async (imageFile, prompts) => {
       }
     );
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
 
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
+    const data = await response.json();
+    console.log("Generated images:", data);
 
-      const chunk = decoder.decode(value);
-      const lines = chunk.trim().split("\n");
-
-      for (const line of lines) {
-        const { image } = JSON.parse(line);
-        images.value.push(image);
-        console.log("image", image);
-      }
+    if (data.images && Array.isArray(data.images)) {
+      images.value = data.images;
+    } else {
+      throw new Error("Invalid response format: No images found");
     }
 
     loadingImages.value = false;
   } catch (err) {
+    console.error("Error generating images:", err);
     errorImages.value = `Error: ${err.message}`;
     loadingImages.value = false;
   }
