@@ -192,9 +192,16 @@ const generatePrompt = (name, attitudes) => {
 const handleClickGenerateStory = async () => {
   // await generateStory(); // 生成故事
   if (story.value) {
-    const prompts = extractImageDescriptions(story.value);
-    console.log("prompts", prompts);
-    await generateImages(imageFile.value, prompts);
+    // const prompts = extractImageDescriptions(story.value);
+    // console.log("prompts", prompts);
+    const prompts = [
+      "Loriané站在鍛造工坊前，微風輕拂她的長髮，四周樹叢中的發光生物宛如星星般閃爍，背景是暗紫色的天空，顯得神秘而寧靜。",
+      "Loriané與Gryne站在市集中心，眾多市民圍觀。Gryne正巧妙地將水流塑造成涓涓細流，Loriané則專注地注視著，雙眼閃著期盼的光芒，背景是鮮豔的商品與喧鬧的人群。",
+      "Loriané在陰暗的森林中艱難前行，四周的樹木高聳入雲，偶爾傳來野獸的低吼。她握緊手中自製的武器，臉上充滿決心與緊張，背景的光線透過樹間隙射入，營造出緊迫的氣氛。",
+      "Loriané面對粗壯且兇猛的野獸，表情專注，周圍環繞著閃爍的光影，野獸被困在光影中，表現出無助和困惑。她的姿態堅挺，代表著她內心的力量與勇氣。",
+      "Loriané站在村莊的廣場上，周圍是歡呼的村民，她的臉上流露出滿足的微笑，象徵著堅強所帶來的變化。背景是明亮的藍天和飄蕩的白雲，映衬著重新建立的和諧氛圍。",
+    ];
+    await generateImages(prompts);
   }
 };
 
@@ -237,20 +244,17 @@ const generateStory = async () => {
   }
 };
 
-const generateImages = async (imageFile, prompts) => {
+const generateImages = async (prompts) => {
   loadingImages.value = true;
   errorImages.value = "";
   images.value = [];
-  console.log("generateImages");
   try {
-    const base64Image = imageFile ? await fileToBase64(imageFile) : null;
-
     const response = await fetch(
       "https://generateimages-xfnkw3l2zq-uc.a.run.app",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64Image, prompts }),
+        body: JSON.stringify({ prompts }),
       }
     );
 

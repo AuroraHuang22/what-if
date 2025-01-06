@@ -1,5 +1,3 @@
-const fs = require("fs");
-const path = require("path");
 const {onRequest} = require("firebase-functions/v2/https");
 const {defineSecret} = require("firebase-functions/params");
 const OpenAI = require("openai");
@@ -56,49 +54,25 @@ exports.generateImages = onRequest(
     {secrets: [openaiApiKey], cors: true, timeoutSeconds: 180},
     async (req, res) => {
       const openai = new OpenAI({apiKey: openaiApiKey.value()});
-      const {image, prompts} = req.body;
+      const {prompts} = req.body;
 
       if (!Array.isArray(prompts) || prompts.length === 0) {
         return res
             .status(400)
             .send({error: "Prompts must be a non-empty array."});
       }
-
       try {
-        let imageFilePath = null;
-
-        if (image) {
-          const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
-          imageFilePath = path.join(__dirname, "temp.png");
-          fs.writeFileSync(imageFilePath, Buffer.from(base64Data, "base64"));
-        }
-
         const imageUrls = [];
         for (const prompt of prompts) {
-          if (imageFilePath) {
-            const response = await openai.images.edit({
-              prompt,
-              image: fs.createReadStream(imageFilePath),
-              n: 1,
-              size: "1024x1024",
-            });
-            imageUrls.push(response.data[0].url);
-          } else {
-            const response = await openai.images.generate({
-              prompt,
-              n: 1,
-              size: "1024x1024",
-              model: "dall-e-2",
-            });
-            imageUrls.push(response.data[0].url);
-          }
+          const response = await openai.images.generate({
+            prompt,
+            n: 1,
+            size: "1024x1024",
+            model: "dall-e-2",
+          });
+          imageUrls.push(response.data[0].url);
         }
-
         res.status(200).send({images: imageUrls});
-
-        if (imageFilePath) {
-          fs.unlinkSync(imageFilePath);
-        }
       } catch (error) {
         console.error("Error generating images:", error.message);
         res.status(500).send({error: "Failed to generate images."});
