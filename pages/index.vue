@@ -1,8 +1,11 @@
 <template>
-  <div class="flex justify-between min-h-screen bg-gray-800 text-white">
-    <!-- 左側表單 -->
+  <div class="flex justify-between min-h-screen text-white">
+    <client-only>
+      <BackgroundAnimation />
+    </client-only>
+
     <UCard
-      class="w-1/3 p-6 m-4 bg-transparent !ring-0"
+      class="w-1/3 p-6 m-4 bg-black !ring-0 h-full"
       :ui="{
         divide: 'divide-transparent',
       }"
@@ -13,13 +16,7 @@
       <UForm :state="{ key: 'value' }">
         <p v-text="`請輸入 E-616 的主體代號`" />
         <UInput v-model="name" placeholder="Enter the name" class="mb-4" />
-        <p v-text="`載入此宇宙的形象記錄`" />
-        <input
-          type="file"
-          accept="image/*"
-          @change="handleFileChange"
-          class="mb-4"
-        />
+
         <p v-text="`無論在哪個宇宙都不變的特性是什麼`" />
         <UInput
           v-model="traits"
@@ -72,9 +69,7 @@
           class="p-4 bg-white rounded border border-gray-400 w-full flex flex-col justify-center items-center min-h-[calc(100vh-100px)]"
         >
           <p class="text-center">{{ scene.情節 }}</p>
-          <div v-if="loadingImages && !images[index]">
-            Generating images...
-          </div>
+          <div v-if="loadingImages && !images[index]">Generating images...</div>
           <img
             :src="images[index]"
             alt="Generated Scene"
@@ -107,50 +102,60 @@ const styleList = [
   "復古未來風 (Retro Futurism)",
   "哥德式風格",
   "水彩寫意風",
-  "漫畫風格"
+  "漫畫風格",
 ];
-// const mockObject = {
-//   版本: "1.0",
-//   角色設定: {
-//     宇宙星球編號: "E-789",
-//     名字: "Liora",
-//     固定特性: "好奇心",
-//   },
-//   前言: "在E-789星球的每日晨曦中，彩虹般的雲層秘藏著無數的奇觀。這裡的居民生性好奇，擁有探索與發現的熱情，尤其是Liora，她的心中滿是對未知的渴望。",
-//   橋段1: {
-//     情節: "在E-789的晨光照耀下，廣袤的大地被五彩斑斕的光影輕柔地包圍。Liora站在她的小木屋前，周圍全是奇形怪狀的植物和閃爍的光螢，眼中流露出驚奇的神情。她夢想著去探險，去發現那些未被探索的場所。",
-//     圖片描述:
-//       "清晨的陽光透過五彩斑斕的雲彩，投射在Liora面前的奇異植物上。她的髮絲隨著微風飄動，穿著淺色的長裙，身旁是各種發光的生物，環境充滿寧靜而神秘的氛圍。",
-//   },
-//   橋段2: {
-//     情節: "在一片神秘的森林中，Liora遇見了她的朋友Lyn，一个擁有透明翅膀的迷小精靈。Lyn在樹間穿梭，對於探索同樣充滿熱情。她們一起分享著各自的發現，討論著未來的夢想，這讓Liora更加堅定了她的冒險決心。",
-//     圖片描述:
-//       "Liora和Lyn圍坐在一棵巨大的發光古樹下，星星般的光點在她們周圍閃爍。Liora微笑著，眼神中流露出對Lyn的仰慕，Lyn則用她晶亮的翅膀在空中劃出一些花樣，兩人都全然沉浸在這片奇幻的世界中。",
-//   },
-//   橋段3: {
-//     情節: "就在Liora與Lyn計劃探險時，突如其來的暴風雨席捲了整個星球，強風和暴雨撕扯著周圍的植物。Liora本能地想要逃離，但她的心中卻充滿了對面對挑戰的好奇與興奮，她決定帶著Lyn一起尋找安全的避難處。",
-//     圖片描述:
-//       "大雨傾盆而下，強風在樹間呼嘯，Liora和Lyn兩人沉著應對，臉上卻露出不安與堅毅的表情。周圍的林木搖曳不定，閃電划破夜空，照亮了她們面前的道路。",
-//   },
-//   橋段4: {
-//     情節: "Liora帶著好奇的心情，觀察著周遭的情況，突然她注意到一株特別堅韌的植物。她想到了這株植物的根部可能隱藏著天然的洞穴，於是她鼓勵Lyn一起探索。二人小心翼翼地接近那株植物，並終於找到了能夠避難的地方。",
-//     圖片描述:
-//       "Liora面對著一株高大的植物，神情專注，雙手輕輕撫摸著它的葉片，周圍雜草中透出微弱的光芒。她的好奇心讓她的眼睛閃爍著期待，Lyn在一旁默默支持著她，空氣中充滿緊張與能量的交織。",
-//   },
-//   橋段5: {
-//     情節: "暴風雨終於過去，Liora和Lyn安全地躲在植物隱秘的空間裡，她們的心中充滿了成就感。這次的冒險不僅讓她們避開了危險，也讓Liora更加確信自己對未知的探索精神是多麼珍貴。她發誓往後要更加勇敢地追尋所有的好奇心源頭。",
-//     圖片描述:
-//       "Liora和Lyn走出避難所，臉上洋溢著笑容，陽光再次點亮了大地。Liora的眼中閃爍著堅定的光芒，看向天空，似乎在思考她下一個冒險的目的地。周圍是剛被雨水沖刷過的清新空氣，色彩格外艷麗。",
-//   },
-// };
-const story = ref();
+const mockObject = {
+  角色設定: {
+    宇宙星球編號: "E-717",
+    名字: "Aiden",
+    固定特性: "財富自由",
+  },
+  角色樣貌描述:
+    "Aiden擁有一頭金色的捲髮，碧藍的眼睛如深邃的海洋，穿著一套優雅的白色西裝，搭配銀色的手錶，散發著自信與魅力。",
+  前言: "在平行宇宙E-717，財富自由並不僅僅是金錢的象徵，而是一種生活方式的表現。Aiden是一位享受無拘無束生活的富豪，他的每一天都充滿了冒險與挑戰。",
+  橋段1: {
+    情節: "E-717的城市景觀如夢幻般的宮殿，天際線由閃爍的水晶塔樓組成，Aiden站在私人飛艇上，俯瞰著這座燦爛的都市。此時的天空充滿著奇異的粉色與紫色雲彩，宛如夢幻世界。",
+    圖片描述:
+      "畫面中，一艘閃著金光的飛艇懸浮在空中，Aiden站在船頭，微笑著面對城市，背景是高聳入雲的水晶塔，星星點點的燈光映照著他的西裝，增添了一層神秘感。",
+  },
+  橋段2: {
+    情節: "Aiden穿梭於一個華麗而獨特的市場，市場中有外星人在推銷他們的獨特商品。此時，他遇到了一位名叫Liora的外星藝術家，她的作品擁有令人驚嘆的能量。",
+    圖片描述:
+      "在五顏六色的市場中，Liora展出她發光的藝術品，Aiden正在仔細欣賞，周圍是愉快的顧客，天空中懸浮著各式形狀的氣球，呈現出慶典的氛圍。",
+  },
+  橋段3: {
+    情節: "在市場的深處，Aiden發現一個秘密組織正在策劃劫持Liora的藝術作品。他感受到危機逼近，心急如焚。時光如同硬幣般留不住，他必須快速行動。",
+    圖片描述:
+      "畫面轉至黑暗的角落，Aiden的表情緊張，手握著設備追蹤劫匪，滑稽的陰影讓場景充滿緊迫感，Liora在一旁緊張地看著，周圍的聲音模糊而急促。",
+  },
+  橋段4: {
+    情節: "Aiden利用他的財富自由，啟動了全城市的安全系統，調度警察和私人保安迅速集結，保護Liora的藝術，並同時設計了一個交易，讓劫匪無法逃脫。",
+    圖片描述:
+      "在閃爍的控制台前，Aiden面對多屏的舊式技術，眼中充滿專注，身後是迅速反應的安保團隊，色彩對比強烈，展現出計畫的高效與他的鬥志。",
+  },
+  橋段5: {
+    情節: "經過一番周折，Aiden成功拯救了Liora的藝術作品，兩人一同欣賞新的作品。Aiden認識到，財富自由不僅是金錢，更是能夠影響他人生活的力量。他決定將一部分财富投入到藝術和教育中，幫助更多的創作者。",
+    圖片描述:
+      "在夕陽的映照下，Aiden和Liora一起站在畫廊中，周圍的藝術作品在金色的光芒中閃耀，他們的臉上洋溢著滿足的笑容，環境明亮而充滿希望，象徵著未來的變化與可能。",
+  },
+};
+
+const mockImages = [
+  "https://oaidalleapiprodscus.blob.core.windows.net/private/org-ZfZCji7FdjrDaMC8MHOQlsQj/user-2UFaAA7cO04jrbGXXNrZdAak/img-H3scptmTr6QvHCsgdfiNMW6K.png?st=2025-01-06T14%3A54%3A48Z&se=2025-01-06T16%3A54%3A48Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-01-06T00%3A32%3A55Z&ske=2025-01-07T00%3A32%3A55Z&sks=b&skv=2024-08-04&sig=NedRrUtIj/ZKEtbTu11svkrM80oPIKjy4kHtlStUYug%3D",
+  "https://oaidalleapiprodscus.blob.core.windows.net/private/org-ZfZCji7FdjrDaMC8MHOQlsQj/user-2UFaAA7cO04jrbGXXNrZdAak/img-o27LFtyFZePWExsT2aeviwSI.png?st=2025-01-06T14%3A55%3A06Z&se=2025-01-06T16%3A55%3A06Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-01-06T00%3A34%3A49Z&ske=2025-01-07T00%3A34%3A49Z&sks=b&skv=2024-08-04&sig=SCZsvPdD%2BGwjB7DTVkyenRIwhpHP7Z47HliTeOtZA9E%3D",
+  "https://oaidalleapiprodscus.blob.core.windows.net/private/org-ZfZCji7FdjrDaMC8MHOQlsQj/user-2UFaAA7cO04jrbGXXNrZdAak/img-XcHiAXck2QThsJ2dsZN0SzmV.png?st=2025-01-06T14%3A55%3A24Z&se=2025-01-06T16%3A55%3A24Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-01-06T00%3A28%3A43Z&ske=2025-01-07T00%3A28%3A43Z&sks=b&skv=2024-08-04&sig=J91qERhQWphlsMEkKhl/KTJ5iILVGcogbjwMHJZjXvY%3D",
+  "https://oaidalleapiprodscus.blob.core.windows.net/private/org-ZfZCji7FdjrDaMC8MHOQlsQj/user-2UFaAA7cO04jrbGXXNrZdAak/img-AwqvicopHsXP4w8ZmWTYwAMF.png?st=2025-01-06T14%3A55%3A34Z&se=2025-01-06T16%3A55%3A34Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-01-06T07%3A39%3A04Z&ske=2025-01-07T07%3A39%3A04Z&sks=b&skv=2024-08-04&sig=/zHJi3zhuow3eHQd92K8hEAd0RQ%2B5g1CCY8JBZivOjY%3D",
+  "https://oaidalleapiprodscus.blob.core.windows.net/private/org-ZfZCji7FdjrDaMC8MHOQlsQj/user-2UFaAA7cO04jrbGXXNrZdAak/img-HPfhytmjrSZtqx1gQD9PEzbp.png?st=2025-01-06T14%3A55%3A54Z&se=2025-01-06T16%3A55%3A54Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-01-06T00%3A51%3A37Z&ske=2025-01-07T00%3A51%3A37Z&sks=b&skv=2024-08-04&sig=McGhd4W6%2BOZ73vDt6BYQE0MyEyrlLAVE8Flnexz1jpU%3D",
+];
+
+const story = ref(mockObject);
 const loading = ref(false);
 const error = ref("");
 const name = ref("");
 const traits = ref("");
 const imageFile = ref(null);
 
-const images = ref([]);
+const images = ref(mockImages);
 const loadingImages = ref(false);
 const errorImages = ref("");
 
@@ -213,7 +218,7 @@ const handleClickGenerateStory = async () => {
   if (story.value) {
     const prompts = extractImageDescriptions(story.value);
     console.log("prompts", prompts);
-    if (prompts.length > 0){
+    if (prompts.length > 0) {
       await generateImages(prompts);
     }
   }

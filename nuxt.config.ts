@@ -17,6 +17,8 @@ export default defineNuxtConfig({
       routes: ['/', '/404'], // 明確指定要預渲染的路由
     },
   },
-
+  plugins: [
+    { src: "~/components/BackgroundAnimation.vue", mode: "client" },
+  ],
   compatibilityDate: '2025-01-06',
 });
