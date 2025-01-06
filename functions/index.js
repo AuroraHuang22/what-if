@@ -21,7 +21,6 @@ exports.generateStory = onRequest(
             {role: "system", content: "You are a creative storyteller."},
             {role: "user", content: prompt},
           ],
-          max_tokens: 500,
         });
         console.log("OpenAI API Key in use");
         const story = storyCompletion.choices[0]?.message?.content?.trim();
