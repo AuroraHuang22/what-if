@@ -38,33 +38,85 @@
       </UForm>
     </UCard>
 
-    <UCard class="w-2/3 p-6 m-4 bg-gray-100 text-black shadow">
-      <h1 class="text-[48px] font-bold">Generated Story</h1>
+    <div
+      class="w-1/3 p-6 m-4 bg-gray-100 text-black shadow flex flex-col max-h-[calc(100vh-40px)] overflow-y-scroll"
+    >
+      <h1 v-if="!story" class="text-[48px] font-bold">Generated Story</h1>
       <h2
         class="text-[24px] font-bold text-center text-gray-500"
         v-if="loading"
       >
         Loading...
       </h2>
-      <div v-else-if="story" class="p-4 bg-white rounded">
-        <p v-text="story" />
+      <div v-else-if="story" class="flex flex-col">
+        <!-- 封面 -->
+        <div
+          class="p-4 bg-white rounded border border-gray-400 w-full flex flex-col justify-center items-center min-h-[calc(100vh-100px)] gap-[48px]"
+        >
+          <div class="text-[18px] font-bold" >
+            你在 <span class="text-[28px] font-extrabold text-red-800">{{ story.角色設定.宇宙星球編號 }}</span> 的宇宙中
+            編號是 <span class="text-[28px] font-extrabold text-red-800">{{ story.角色設定.名字 }}</span>
+          </div>
+          <div class="text-center">{{ story.前言 }}</div>
+        </div>
+
+        <!-- 橋段 -->
+        <div
+          v-for="(scene, index) in scenes"
+          :key="index"
+          class="p-4 bg-white rounded border border-gray-400 w-full flex flex-col justify-center items-center min-h-[calc(100vh-100px)]"
+        >
+          <p class="text-center">{{ scene.情節 }}</p>
+        </div>
       </div>
       <div v-else class="text-center text-gray-500">
         Your story will appear here...
       </div>
-    </UCard>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
-const name = ref("");
-const image = ref(null);
-const traits = ref("");
-const story = ref("");
+const story = ref({
+  角色設定: {
+    宇宙星球編號: "E-789",
+    名字: "Liora",
+    固定特性: "好奇心",
+  },
+  前言: "在E-789星球的每日晨曦中，彩虹般的雲層秘藏著無數的奇觀。這裡的居民生性好奇，擁有探索與發現的熱情，尤其是Liora，她的心中滿是對未知的渴望。",
+  橋段1: {
+    情節: "在E-789的晨光照耀下，廣袤的大地被五彩斑斕的光影輕柔地包圍。Liora站在她的小木屋前，周圍全是奇形怪狀的植物和閃爍的光螢，眼中流露出驚奇的神情。她夢想著去探險，去發現那些未被探索的場所。",
+    圖片描述:
+      "清晨的陽光透過五彩斑斕的雲彩，投射在Liora面前的奇異植物上。她的髮絲隨著微風飄動，穿著淺色的長裙，身旁是各種發光的生物，環境充滿寧靜而神秘的氛圍。",
+  },
+  橋段2: {
+    情節: "在一片神秘的森林中，Liora遇見了她的朋友Lyn，一个擁有透明翅膀的迷小精靈。Lyn在樹間穿梭，對於探索同樣充滿熱情。她們一起分享著各自的發現，討論著未來的夢想，這讓Liora更加堅定了她的冒險決心。",
+    圖片描述:
+      "Liora和Lyn圍坐在一棵巨大的發光古樹下，星星般的光點在她們周圍閃爍。Liora微笑著，眼神中流露出對Lyn的仰慕，Lyn則用她晶亮的翅膀在空中劃出一些花樣，兩人都全然沉浸在這片奇幻的世界中。",
+  },
+  橋段3: {
+    情節: "就在Liora與Lyn計劃探險時，突如其來的暴風雨席捲了整個星球，強風和暴雨撕扯著周圍的植物。Liora本能地想要逃離，但她的心中卻充滿了對面對挑戰的好奇與興奮，她決定帶著Lyn一起尋找安全的避難處。",
+    圖片描述:
+      "大雨傾盆而下，強風在樹間呼嘯，Liora和Lyn兩人沉著應對，臉上卻露出不安與堅毅的表情。周圍的林木搖曳不定，閃電划破夜空，照亮了她們面前的道路。",
+  },
+  橋段4: {
+    情節: "Liora帶著好奇的心情，觀察著周遭的情況，突然她注意到一株特別堅韌的植物。她想到了這株植物的根部可能隱藏著天然的洞穴，於是她鼓勵Lyn一起探索。二人小心翼翼地接近那株植物，並終於找到了能夠避難的地方。",
+    圖片描述:
+      "Liora面對著一株高大的植物，神情專注，雙手輕輕撫摸著它的葉片，周圍雜草中透出微弱的光芒。她的好奇心讓她的眼睛閃爍著期待，Lyn在一旁默默支持著她，空氣中充滿緊張與能量的交織。",
+  },
+  橋段5: {
+    情節: "暴風雨終於過去，Liora和Lyn安全地躲在植物隱秘的空間裡，她們的心中充滿了成就感。這次的冒險不僅讓她們避開了危險，也讓Liora更加確信自己對未知的探索精神是多麼珍貴。她發誓往後要更加勇敢地追尋所有的好奇心源頭。",
+    圖片描述:
+      "Liora和Lyn走出避難所，臉上洋溢著笑容，陽光再次點亮了大地。Liora的眼中閃爍著堅定的光芒，看向天空，似乎在思考她下一個冒險的目的地。周圍是剛被雨水沖刷過的清新空氣，色彩格外艷麗。",
+  },
+}); // 假設故事內容從 API 返回後會被賦值
 const loading = ref(false);
 const error = ref("");
+const name = ref("");
+const traits = ref("");
+const image = ref("");
 
 const generatePrompt = (name, attitudes) => {
   return `
@@ -143,4 +195,23 @@ const generateStory = async () => {
     loading.value = false;
   }
 };
+
+const cover = computed(() => {
+  if (!story.value || !story.value["角色設定"] || !story.value["前言"]) {
+    return "";
+  }
+  const planet = story.value["角色設定"]["宇宙星球編號"];
+  const name = story.value["角色設定"]["名字"];
+  const preface = story.value["前言"];
+  return `你在 ${planet} 的宇宙中\n名字是 ${name}\n\n${preface}`;
+});
+
+const scenes = computed(() => {
+  if (!story.value) {
+    return [];
+  }
+  return Object.keys(story.value)
+    .filter((key) => key.startsWith("橋段"))
+    .map((key) => story.value[key]);
+});
 </script>
