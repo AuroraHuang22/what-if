@@ -63,12 +63,9 @@ exports.generateImages = onRequest(
       }
       try {
         const imageUrls = [];
-        const styleList = ["手繪童話風格", "宮崎駿風格", "維多利亞時代風格", "卡通風格", "科幻風格"];
-        const style = styleList[Math.floor(Math.random() * styleList.length)];
         for (const prompt of prompts) {
-          const formatPrompt = `${prompt} in ${style}.`;
           const response = await openai.images.generate({
-            prompt: formatPrompt,
+            prompt,
             n: 1,
             size: "1024x1024",
             model: "dall-e-3",
