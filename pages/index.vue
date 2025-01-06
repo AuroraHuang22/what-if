@@ -14,11 +14,10 @@
         <p v-text="`請輸入 E-616 的主體代號`" />
         <UInput v-model="name" placeholder="Enter the name" class="mb-4" />
         <p v-text="`載入此宇宙的形象記錄`" />
-        <UInput
-          v-model="imageFile"
+        <input
           type="file"
-          size="sm"
-          icon="i-heroicons-folder"
+          accept="image/*"
+          @change="handleFileChange"
           class="mb-4"
         />
         <p v-text="`無論在哪個宇宙都不變的特性是什麼`" />
@@ -243,11 +242,10 @@ const generateImages = async (imageFile, prompts) => {
   errorImages.value = "";
   images.value = []; // 清空之前的图片列表
   console.log("generateImages");
-
+  console.log("imageFile:", imageFile);
+  console.log("imageFile type:", typeof imageFile);
   try {
-    const base64Image = imageFile
-      ? await fileToBase64(imageFile)
-      : null;
+    const base64Image = imageFile ? await fileToBase64(imageFile) : null;
 
     const response = await fetch(
       "https://generateimages-xfnkw3l2zq-uc.a.run.app",
@@ -283,6 +281,15 @@ const extractImageDescriptions = (story) => {
   return Object.keys(story)
     .filter((key) => key.startsWith("橋段"))
     .map((key) => story[key].圖片描述);
+};
+
+const handleFileChange = (event) => {
+  if (event.target && event.target.files && event.target.files.length > 0) {
+    imageFile.value = event.target.files[0];
+    console.log("Selected file:", imageFile.value);
+  } else {
+    console.error("No file selected or invalid event.");
+  }
 };
 
 const fileToBase64 = (file) => {
