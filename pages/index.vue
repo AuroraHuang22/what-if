@@ -195,7 +195,7 @@ const handleClickGenerateStory = async () => {
   if (story.value) {
     const prompts = extractImageDescriptions(story.value);
     console.log("prompts", prompts);
-    // await generateImages(prompts);
+    await generateImages(prompts);
   }
 };
 
