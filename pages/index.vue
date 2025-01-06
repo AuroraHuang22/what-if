@@ -240,10 +240,8 @@ const generateStory = async () => {
 const generateImages = async (imageFile, prompts) => {
   loadingImages.value = true;
   errorImages.value = "";
-  images.value = []; // 清空之前的图片列表
+  images.value = [];
   console.log("generateImages");
-  console.log("imageFile:", imageFile);
-  console.log("imageFile type:", typeof imageFile);
   try {
     const base64Image = imageFile ? await fileToBase64(imageFile) : null;
 

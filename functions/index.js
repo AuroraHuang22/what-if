@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const {onRequest} = require("firebase-functions/v2/https");
 const {defineSecret} = require("firebase-functions/params");
 const OpenAI = require("openai");
@@ -34,8 +36,10 @@ exports.generateStory = onRequest(
           formattedStory = JSON.parse(cleanedStory);
           res.status(200).send({story: formattedStory});
         } catch (jsonError) {
-          console.warn("Failed to parse JSON. Returning raw content.",
-              jsonError.message);
+          console.warn(
+              "Failed to parse JSON. Returning raw content.",
+              jsonError.message,
+          );
           res.status(200).send({
             story: rawStory,
             warning: "Story returned as plain text due to JSON parse error.",
@@ -55,21 +59,30 @@ exports.generateImages = onRequest(
       const {image, prompts} = req.body;
 
       if (!Array.isArray(prompts) || prompts.length === 0) {
-        return res.status(400)
+        return res
+            .status(400)
             .send({error: "Prompts must be a non-empty array."});
       }
 
       try {
-        const imagePromises = prompts.map(async (prompt) => {
-          if (image) {
-            const response = await openai.images.edits({
+        let imageFilePath = null;
+
+        if (image) {
+          const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+          imageFilePath = path.join(__dirname, "temp.png");
+          fs.writeFileSync(imageFilePath, Buffer.from(base64Data, "base64"));
+        }
+
+        const imageUrls = [];
+        for (const prompt of prompts) {
+          if (imageFilePath) {
+            const response = await openai.images.edit({
               prompt,
-              image,
+              image: fs.createReadStream(imageFilePath),
               n: 1,
               size: "1024x1024",
-              model: "dall-e-2",
             });
-            return response.data[0].url;
+            imageUrls.push(response.data[0].url);
           } else {
             const response = await openai.images.generate({
               prompt,
@@ -77,13 +90,15 @@ exports.generateImages = onRequest(
               size: "1024x1024",
               model: "dall-e-2",
             });
-            return response.data[0].url;
+            imageUrls.push(response.data[0].url);
           }
-        });
-
-        const imageUrls = await Promise.all(imagePromises);
+        }
 
         res.status(200).send({images: imageUrls});
+
+        if (imageFilePath) {
+          fs.unlinkSync(imageFilePath);
+        }
       } catch (error) {
         console.error("Error generating images:", error.message);
         res.status(500).send({error: "Failed to generate images."});
