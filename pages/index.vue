@@ -155,6 +155,7 @@ const generatePrompt = (name, attitudes) => {
     "名字": "用 ${name} 作為靈感設定",
     "固定特性": "${attitudes}"
   },
+  "角色樣貌描述": "描述主角的外貌關鍵特徵（髮色、眼睛顏色）、衣著特徵（比如銀色長袍）。",
   "前言": "",
   "橋段1": {
     "情節": "描述該宇宙/時空的場景，以及主角的角色。",
@@ -190,18 +191,11 @@ const generatePrompt = (name, attitudes) => {
 };
 
 const handleClickGenerateStory = async () => {
-  // await generateStory(); // 生成故事
+  await generateStory(); // 生成故事
   if (story.value) {
-    // const prompts = extractImageDescriptions(story.value);
-    // console.log("prompts", prompts);
-    const prompts = [
-      "Loriané站在鍛造工坊前，微風輕拂她的長髮，四周樹叢中的發光生物宛如星星般閃爍，背景是暗紫色的天空，顯得神秘而寧靜。",
-      "Loriané與Gryne站在市集中心，眾多市民圍觀。Gryne正巧妙地將水流塑造成涓涓細流，Loriané則專注地注視著，雙眼閃著期盼的光芒，背景是鮮豔的商品與喧鬧的人群。",
-      "Loriané在陰暗的森林中艱難前行，四周的樹木高聳入雲，偶爾傳來野獸的低吼。她握緊手中自製的武器，臉上充滿決心與緊張，背景的光線透過樹間隙射入，營造出緊迫的氣氛。",
-      "Loriané面對粗壯且兇猛的野獸，表情專注，周圍環繞著閃爍的光影，野獸被困在光影中，表現出無助和困惑。她的姿態堅挺，代表著她內心的力量與勇氣。",
-      "Loriané站在村莊的廣場上，周圍是歡呼的村民，她的臉上流露出滿足的微笑，象徵著堅強所帶來的變化。背景是明亮的藍天和飄蕩的白雲，映衬著重新建立的和諧氛圍。",
-    ];
-    await generateImages(prompts);
+    const prompts = extractImageDescriptions(story.value);
+    console.log("prompts", prompts);
+    // await generateImages(prompts);
   }
 };
 
@@ -280,9 +274,13 @@ const generateImages = async (prompts) => {
 };
 
 const extractImageDescriptions = (story) => {
+  const characterDescription = story["角色樣貌描述"] || "";
   return Object.keys(story)
     .filter((key) => key.startsWith("橋段"))
-    .map((key) => story[key].圖片描述);
+    .map((key) => {
+      const sceneDescription = story[key].圖片描述 || "";
+      return `${sceneDescription} 角色樣貌: ${characterDescription}`;
+    });
 };
 
 const handleFileChange = (event) => {
