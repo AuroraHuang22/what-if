@@ -106,7 +106,7 @@ const generateStory = async () => {
   error.value = "";
   story.value = "";
 
-  const prompt = generatePrompt(name.value, traits.value);
+  const prompt = generatePrompt(name.value, traits.value).replace(/\n/g, " ").replace(/\s+/g, " ");
   try {
     const response = await fetch(
       "https://generatestory-xfnkw3l2zq-uc.a.run.app",
