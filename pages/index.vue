@@ -91,7 +91,24 @@
 
 <script setup>
 import { ref, computed } from "vue";
-const styleList = ['賽博和風','未來科幻日系插畫風格','賽博奇幻','奇幻藝術風格','慕夏風格', '宮崎駿風格','維多利亞風格','蒸汽龐克風格','未來科幻','宇宙賽博風格','手繪童趣風','梵谷風格','名偵探柯南風格','侏羅紀公園風格']
+const styleList = [
+  "日本賽博和風",
+  "未來科幻日系插畫風格",
+  "賽博奇幻",
+  "奇幻藝術風格",
+  "慕夏風格",
+  "宮崎駿風格",
+  "維多利亞風格",
+  "蒸汽龐克風格",
+  "宇宙賽博風格",
+  "手繪童趣風",
+  "梵谷風格",
+  "新藝術風格 (Art Nouveau)",
+  "復古未來風 (Retro Futurism)",
+  "哥德式風格",
+  "水彩寫意風",
+  "漫畫風格"
+];
 // const mockObject = {
 //   版本: "1.0",
 //   角色設定: {
@@ -283,7 +300,7 @@ const extractImageDescriptions = (story) => {
     .filter((key) => key.startsWith("橋段"))
     .map((key) => {
       const sceneDescription = story[key].圖片描述 || "";
-      return `${sceneDescription} 角色樣貌: ${characterDescription}，風格: ${selectedStyle}`;
+      return `請用${selectedStyle}畫出：${sceneDescription} 角色樣貌: ${characterDescription}`;
     });
 };
 
