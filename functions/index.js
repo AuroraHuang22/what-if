@@ -49,31 +49,29 @@ exports.generateStory = onRequest(
 );
 
 exports.generateImages = onRequest(
-    {secrets: [openaiApiKey], cors: true},
+    {secrets: [openaiApiKey], cors: true, timeoutSeconds: 180},
     async (req, res) => {
-      const openai = new OpenAI({
-        apiKey: openaiApiKey.value(),
-      });
+      const openai = new OpenAI({apiKey: openaiApiKey.value()});
+      const {image, prompts} = req.body;
 
       try {
-        const prompts = req.body.prompts || [
-          "A brave knight entering a mysterious forest",
-          "A fierce battle between the knight and a dragon",
-        ];
-
-        const imagePromises = prompts.map((prompt) =>
-          openai.images.generate({
+        const imageUrls = [];
+        for (const prompt of prompts) {
+          const response = await openai.images.generate({
             prompt,
+            image,
             n: 1,
             size: "1024x1024",
-          }),
-        );
+            model: "dall-e-2",
+          });
 
-        const images = await Promise.all(imagePromises);
-        const imageUrls = images.map((imageResponse) =>
-          imageResponse.data[0].url);
+          const imageUrl = response.data[0].url;
+          imageUrls.push(imageUrl);
 
-        res.status(200).send({images: imageUrls});
+          res.write(JSON.stringify({image: imageUrl}) + "\n");
+        }
+
+        res.end();
       } catch (error) {
         console.error("Error generating images:", error.message);
         res.status(500).send({error: "Failed to generate images."});

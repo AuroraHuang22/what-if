@@ -15,7 +15,7 @@
         <UInput v-model="name" placeholder="Enter the name" class="mb-4" />
         <p v-text="`載入此宇宙的形象記錄`" />
         <UInput
-          v-model="image"
+          v-model="imageFile"
           type="file"
           size="sm"
           icon="i-heroicons-folder"
@@ -30,7 +30,7 @@
         <UButton
           :disabled="loading"
           class="mt-4 bg-blue-500"
-          @click="generateStory"
+          @click="handleClickGenerateStory"
         >
           <span v-if="loading">Generating...</span>
           <span v-else>Let’s Open the Portal</span>
@@ -53,9 +53,15 @@
         <div
           class="p-4 bg-white rounded border border-gray-400 w-full flex flex-col justify-center items-center min-h-[calc(100vh-100px)] gap-[48px]"
         >
-          <div class="text-[18px] font-bold" >
-            你在 <span class="text-[28px] font-extrabold text-red-800">{{ story.角色設定.宇宙星球編號 }}</span> 的宇宙中
-            編號是 <span class="text-[28px] font-extrabold text-red-800">{{ story.角色設定.名字 }}</span>
+          <div class="text-[18px] font-bold">
+            你在
+            <span class="text-[28px] font-extrabold text-red-800">{{
+              story.角色設定.宇宙星球編號
+            }}</span>
+            的宇宙中 編號是
+            <span class="text-[28px] font-extrabold text-red-800">{{
+              story.角色設定.名字
+            }}</span>
           </div>
           <div class="text-center">{{ story.前言 }}</div>
         </div>
@@ -67,6 +73,14 @@
           class="p-4 bg-white rounded border border-gray-400 w-full flex flex-col justify-center items-center min-h-[calc(100vh-100px)]"
         >
           <p class="text-center">{{ scene.情節 }}</p>
+          <div v-if="loadingImages && !images[index]?.imageUrl">
+            Generating images...
+          </div>
+          <img
+            :src="images[index]?.imageUrl"
+            alt="Generated Scene"
+            class="w-full rounded"
+          />
         </div>
       </div>
       <div v-else class="text-center text-gray-500">
@@ -78,8 +92,8 @@
 
 <script setup>
 import { ref, computed } from "vue";
-
-const story = ref({
+const mockObject = {
+  版本: "1.0",
   角色設定: {
     宇宙星球編號: "E-789",
     名字: "Liora",
@@ -111,12 +125,26 @@ const story = ref({
     圖片描述:
       "Liora和Lyn走出避難所，臉上洋溢著笑容，陽光再次點亮了大地。Liora的眼中閃爍著堅定的光芒，看向天空，似乎在思考她下一個冒險的目的地。周圍是剛被雨水沖刷過的清新空氣，色彩格外艷麗。",
   },
-}); // 假設故事內容從 API 返回後會被賦值
+};
+const story = ref(mockObject);
 const loading = ref(false);
 const error = ref("");
 const name = ref("");
 const traits = ref("");
-const image = ref("");
+const imageFile = ref(null);
+
+const images = ref([]);
+const loadingImages = ref(false);
+const errorImages = ref("");
+
+const scenes = computed(() => {
+  if (!story.value) {
+    return [];
+  }
+  return Object.keys(story.value)
+    .filter((key) => key.startsWith("橋段"))
+    .map((key) => story.value[key]);
+});
 
 const generatePrompt = (name, attitudes) => {
   return `
@@ -162,10 +190,24 @@ const generatePrompt = (name, attitudes) => {
   `;
 };
 
+const handleClickGenerateStory = async () => {
+  // await generateStory(); // 生成故事
+  if (story.value) {
+    const prompts = extractImageDescriptions(story.value);
+    console.log("prompts", prompts);
+    await generateImages(imageFile.value, prompts);
+  }
+};
+
 const generateStory = async () => {
   loading.value = true;
   error.value = "";
   story.value = "";
+  if (!name.value || !traits.value) {
+    error.value = "Please enter the name and traits.";
+    loading.value = false;
+    return;
+  }
 
   const prompt = generatePrompt(name.value, traits.value)
     .replace(/\n/g, " ")
@@ -196,22 +238,57 @@ const generateStory = async () => {
   }
 };
 
-const cover = computed(() => {
-  if (!story.value || !story.value["角色設定"] || !story.value["前言"]) {
-    return "";
-  }
-  const planet = story.value["角色設定"]["宇宙星球編號"];
-  const name = story.value["角色設定"]["名字"];
-  const preface = story.value["前言"];
-  return `你在 ${planet} 的宇宙中\n名字是 ${name}\n\n${preface}`;
-});
+const generateImages = async (imageFile, prompts) => {
+  loadingImages.value = true;
+  errorImages.value = "";
 
-const scenes = computed(() => {
-  if (!story.value) {
-    return [];
+  try {
+    const base64Image = await fileToBase64(imageFile);
+    const response = await fetch(
+      "https://generateimages-xfnkw3l2zq-uc.a.run.app",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64Image, prompts }),
+      }
+    );
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.trim().split("\n");
+
+      for (const line of lines) {
+        const { image } = JSON.parse(line);
+        images.value.push(image);
+        console.log("image", image);
+      }
+    }
+
+    loadingImages.value = false;
+  } catch (err) {
+    errorImages.value = `Error: ${err.message}`;
+    loadingImages.value = false;
   }
-  return Object.keys(story.value)
+};
+
+const extractImageDescriptions = (story) => {
+  return Object.keys(story)
     .filter((key) => key.startsWith("橋段"))
-    .map((key) => story.value[key]);
-});
+    .map((key) => story[key].圖片描述);
+};
+
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
 </script>
