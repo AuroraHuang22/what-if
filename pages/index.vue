@@ -31,16 +31,6 @@
           class="mb-[60px]"
           placeholder="你的靈魂特質..."
         />
-
-        <!-- <UButton
-          :disabled="loading"
-          class="mt-4 bg-blue-500"
-          @click="handleClickGenerateStory"
-        >
-          <span v-if="loading">Generating...</span>
-          <span v-else>Let’s Open the Portal</span>
-        </UButton> -->
-
         <UButton
           label="Button"
           :disabled="loading"
@@ -50,7 +40,7 @@
           <template #trailing>
             <UIcon name="i-heroicons-arrow-right-20-solid" class="w-5 h-5" />
           </template>
-          <span v-if="loading">Generating...</span>
+          <span v-if="loading || loadingImages">Generating...</span>
           <span v-else>Let’s Open the Portal</span>
         </UButton>
       </UForm>
@@ -79,8 +69,7 @@
       </UButton>
     </div>
     <!-- 封面 -->
-    <!-- <div class="opacity-0 absolute "> -->
-    <div v-if="story" class="opacity-0 absolute right-0">
+    <div v-if="story" class="opacity-0 absolute right-0 z-[-1]">
       <div
         ref="pdfCover"
         class="pl-[110px] pr-[60px] rounded border border-gray-400 w-[600px] min-h-[800px] flex flex-col justify-center items-center gap-[48px] text-white"
