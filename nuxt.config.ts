@@ -19,6 +19,7 @@ export default defineNuxtConfig({
   },
   plugins: [
     { src: "~/components/BackgroundAnimation.vue", mode: "client" },
+    '~/plugins/flipbook.js'
   ],
   compatibilityDate: '2025-01-06',
 });

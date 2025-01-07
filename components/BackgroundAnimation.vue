@@ -1,5 +1,5 @@
 <template>
-  <div id="p5-background"/>
+  <div id="p5-background" />
 </template>
 
 <script>

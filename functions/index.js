@@ -69,6 +69,7 @@ exports.generateImages = onRequest(
             n: 1,
             size: "1024x1024",
             model: "dall-e-3",
+            response_format: "b64_json",
           });
           imageUrls.push(response.data[0].url);
         }
