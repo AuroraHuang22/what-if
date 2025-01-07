@@ -11,44 +11,63 @@ exports.generateStory = onRequest(
         apiKey: openaiApiKey.value(),
       });
 
-      try {
-        const prompt =
-        req.body.prompt ||
-        "Create a story about a brave knight.";
-
-        const response = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages: [
-            {role: "system", content: "You are a creative storyteller."},
-            {role: "user", content: prompt},
-          ],
-        });
-
-        console.log("OpenAI API Key in use");
-
-        const rawStory = response.choices[0]?.message?.content?.trim();
-
-        let formattedStory;
+      const generateStoryAttempt = async (retryCount = 0) => {
         try {
-          const cleanedStory = rawStory.replace(/```json|```/g, "").trim();
-          formattedStory = JSON.parse(cleanedStory);
-          res.status(200).send({story: formattedStory});
-        } catch (jsonError) {
-          console.warn(
-              "Failed to parse JSON. Returning raw content.",
-              jsonError.message,
-          );
-          res.status(200).send({
-            story: rawStory,
+          const prompt =
+          req.body.prompt || "Create a story about a brave knight.";
+
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              {role: "system", content: "You are a creative storyteller."},
+              {role: "user", content: prompt},
+            ],
+          });
+
+          console.log(`OpenAI API Key in use (Attempt ${retryCount + 1})`);
+
+          const rawStory = response.choices[0]?.message?.content?.trim();
+
+          let formattedStory;
+          try {
+            const cleanedStory = rawStory.replace(/```json|```/g, "").trim();
+            formattedStory = JSON.parse(cleanedStory);
+            return {success: true, story: formattedStory};
+          } catch (jsonError) {
+            console.warn(
+                `Failed to parse JSON on attempt ${retryCount + 1}:`,
+                jsonError.message,
+            );
+            if (retryCount < 1) {
+              console.log("Retrying story generation...");
+              return await generateStoryAttempt(retryCount + 1);
+            } else {
+              console.warn("Exhausted retries. Returning raw content.");
+              return {success: false, story: rawStory};
+            }
+          }
+        } catch (error) {
+          console.error("Error generating story:", error.message);
+          throw error;
+        }
+      };
+
+      try {
+        const result = await generateStoryAttempt();
+        if (result.success) {
+          res.status(200).send({story: result.story});
+        } else {
+          res.status(400).send({
+            story: result.story,
             warning: "Story returned as plain text due to JSON parse error.",
           });
         }
       } catch (error) {
-        console.error("Error generating story:", error.message);
         res.status(500).send({error: "Failed to generate story."});
       }
     },
 );
+
 
 exports.generateImages = onRequest(
     {secrets: [openaiApiKey], cors: true, timeoutSeconds: 180},
@@ -62,7 +81,7 @@ exports.generateImages = onRequest(
             .send({error: "Prompts must be a non-empty array."});
       }
       try {
-        const imageUrls = [];
+        const imageB64Array = [];
         for (const prompt of prompts) {
           const response = await openai.images.generate({
             prompt,
@@ -71,9 +90,10 @@ exports.generateImages = onRequest(
             model: "dall-e-3",
             response_format: "b64_json",
           });
-          imageUrls.push(response.data[0].url);
+          const base64Image = response.data[0].b64_json;
+          imageB64Array.push(base64Image);
         }
-        res.status(200).send({images: imageUrls});
+        res.status(200).send({images: imageB64Array});
       } catch (error) {
         console.error("Error generating images:", error.message);
         res.status(500).send({error: "Failed to generate images."});

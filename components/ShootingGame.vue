@@ -235,7 +235,7 @@ export default {
   height: 550px;
   position: absolute;
   top: 50%;
-  left: auto; /* 確保不影響水平定位 */
+  left: 50%; /* 確保不影響水平定位 */
   right: 40px;
   transform: translateY(-50%); /* 修正垂直位置 */
   z-index: 10;
