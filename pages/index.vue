@@ -32,6 +32,9 @@
         </UButton>
       </UForm>
     </UCard>
+    <client-only>
+      <ShootingGame />
+    </client-only>
     <!-- <div
       v-if="story"
       class="flex flex-col gap-[20px] items-center justify-center flex-grow min-h-[calc(100vh-100px)]"
@@ -191,7 +194,7 @@ const generateImages = async (prompts) => {
     console.log("Generated images:", data);
 
     if (data.images && Array.isArray(data.images)) {
-      images.value = data.images;
+      images.value = data.images.map((b64) => `data:image/png;base64,${b64}`);
     } else {
       throw new Error("Invalid response format: No images found");
     }
