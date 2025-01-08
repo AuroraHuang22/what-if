@@ -55,18 +55,25 @@
       class="flex flex-col gap-[20px] items-center justify-center flex-grow min-h-[100vh]"
     >
       <FlipbookVue
+        ref="flipbook"
         class="h-[700px] w-[525px]"
         :pages="flipbookImages"
         :flipDuration="1000"
+        :ambient="0.8"
         :singlePage="true"
         :clickToZoom="false"
-      />
-      <UButton
-        color="#F7715B"
-        @click="downloadPDF"
+        v-slot="flipbook"
       >
-        下載 PDF
-      </UButton>
+        <div class="flex justify-between items-center">
+          <button class="text-white text-[20px]" @click="flipbook.flipLeft">
+            {{`< prev`}}
+          </button>
+          <button class="text-white text-[20px]" @click="flipbook.flipRight">
+            {{`next >`}}
+          </button>
+        </div>
+      </FlipbookVue>
+      <UButton class="bg-[#F7715B] mt-[12px]" @click="downloadPDF"> 下載 PDF </UButton>
     </div>
     <!-- 封面 -->
     <div v-if="story" class="opacity-0 absolute right-0 z-[-1]">
@@ -139,6 +146,7 @@ import {
 const pdfContents = ref([]);
 const pdfCover = ref(null);
 const pdfEnd = ref(null);
+const flipbook = ref(null);
 
 const story = ref();
 const loading = ref(false);
