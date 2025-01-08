@@ -81,8 +81,7 @@ exports.generateImages = onRequest(
             .send({error: "Prompts must be a non-empty array."});
       }
       try {
-        const imageB64Array = [];
-        for (const prompt of prompts) {
+        const imagePromises = prompts.map(async (prompt) => {
           const response = await openai.images.generate({
             prompt,
             n: 1,
@@ -90,9 +89,10 @@ exports.generateImages = onRequest(
             model: "dall-e-3",
             response_format: "b64_json",
           });
-          const base64Image = response.data[0].b64_json;
-          imageB64Array.push(base64Image);
-        }
+          return response.data[0].b64_json;
+        });
+
+        const imageB64Array = await Promise.all(imagePromises);
         res.status(200).send({images: imageB64Array});
       } catch (error) {
         console.error("Error generating images:", error.message);
